@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARGO — Catalogue Builder | FrigoPro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a12;--s1:#0a1020;--s2:#0f1a2e;--s3:#162238;
+  --bd:#1e3354;--bd2:#2a4570;
+  --ali:#ff6a00;--alig:rgba(255,106,0,.13);
+  --mic:#c8102e;--micg:rgba(200,16,46,.13);
+  --ok:#00e676;--okg:rgba(0,230,118,.1);
+  --warn:#ffab00;--warng:rgba(255,171,0,.1);
+  --info:#00c8ff;--infog:rgba(0,200,255,.1);
+  --red:#ff4060;--redg:rgba(255,64,96,.1);
+  --txt:#ddeeff;--muted:#4a6a8a;--soft:#7a9abf;
+  --r:12px;--r2:8px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* HEADER */
+.header{background:var(--s1);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.h-brand{display:flex;align-items:center;gap:12px}
+.h-ico{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#ff6a00,#ff9500);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif}
+.h-title{font-size:18px;font-weight:800}
+.h-title em{color:var(--info);font-style:normal}
+.h-sub{font-size:11px;color:var(--muted)}
+.h-right{display:flex;gap:8px;align-items:center}
+.hpill{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid;display:flex;align-items:center;gap:5px}
+.hpill.ok{background:var(--okg);border-color:rgba(0,230,118,.3);color:var(--ok)}
+.hpill.info{background:var(--infog);border-color:rgba(0,200,255,.3);color:var(--info)}
+.hpill .dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 69px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--s1);border-right:1px solid var(--bd);padding:18px;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.stitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px}
+
+/* SEARCH BOX */
+.search-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:16px}
+.search-input{width:100%;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:10px 14px;color:var(--txt);font-size:13px;outline:none;font-family:'Outfit',sans-serif;transition:.15s;margin-bottom:10px}
+.search-input:focus{border-color:var(--info)}
+.search-input::placeholder{color:var(--muted)}
+.search-hint{font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+
+/* QUICK SEARCHES */
+.quick-list{display:flex;flex-direction:column;gap:5px}
+.quick-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r2);border:1px solid var(--bd);background:var(--s1);cursor:pointer;transition:.15s;font-size:12px;color:var(--soft)}
+.quick-item:hover{border-color:var(--info);color:var(--info);background:var(--infog)}
+.quick-ico{font-size:14px;width:22px;text-align:center}
+.quick-name{flex:1}
+.quick-cat{font-size:9px;color:var(--muted);background:var(--s2);padding:1px 5px;border-radius:4px}
+
+/* SOURCE TOGGLES */
+.sources-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.src-tog{padding:9px;border-radius:var(--r2);border:1px solid var(--bd);background:var(--s2);cursor:pointer;transition:.15s;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'Outfit',sans-serif;color:var(--muted)}
+.src-tog.ali-on{background:var(--alig);border-color:rgba(255,106,0,.4);color:var(--ali)}
+.src-tog.mic-on{background:var(--micg);border-color:rgba(200,16,46,.4);color:var(--mic)}
+
+/* SETTINGS */
+.setting{margin-bottom:10px}
+.slabel{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px}
+.sselect,.sinput{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:8px 11px;color:var(--txt);font-size:12px;outline:none;font-family:'Outfit',sans-serif;transition:.15s}
+.sselect:focus,.sinput:focus{border-color:var(--info)}
+.sselect option{background:var(--s2)}
+.margin-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mbox{background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:8px;text-align:center}
+.mbox-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.mbox input{width:100%;background:transparent;border:none;color:var(--info);font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;text-align:center;outline:none}
+
+/* BUTTONS */
+.btn{width:100%;padding:12px;border-radius:var(--r2);border:none;font-weight:800;font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;transition:.2s}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:linear-gradient(135deg,var(--info),#0080ff);color:#fff}
+.btn.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,200,255,.3)}
+.btn.success{background:var(--ok);color:#060a12}
+.btn.success:hover:not(:disabled){background:#fff}
+.btn.ghost{background:var(--s2);border:1px solid var(--bd);color:var(--soft)}
+.btn.ghost:hover:not(:disabled){border-color:var(--info);color:var(--info)}
+.btn.danger{background:var(--redg);border:1px solid rgba(255,64,96,.3);color:var(--red)}
+.btn.danger:hover:not(:disabled){background:var(--red);color:#fff}
+
+/* HISTORY */
+.history-list{display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto}
+.hist-item{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:6px;background:var(--s2);border:1px solid var(--bd);cursor:pointer;transition:.15s;font-size:11px;color:var(--soft)}
+.hist-item:hover{border-color:var(--info);color:var(--info)}
+.hist-kw{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:2px;transition:.15s}
+.hist-del:hover{color:var(--red)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.tabs{background:var(--s1);border-bottom:1px solid var(--bd);display:flex;padding:10px 22px 0;gap:2px}
+.tab{padding:7px 14px;border-radius:7px 7px 0 0;border:1px solid transparent;border-bottom:none;cursor:pointer;font-size:12px;font-weight:600;background:none;color:var(--muted);font-family:'Outfit',sans-serif;position:relative;bottom:-1px;transition:.15s}
+.tab:hover{color:var(--soft)}
+.tab.on{background:var(--s2);border-color:var(--bd);border-bottom-color:var(--s2);color:var(--txt)}
+.tbadge{font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px;margin-left:4px}
+.tbadge.info{background:var(--info);color:#060a12}
+.tbadge.ok{background:var(--ok);color:#060a12}
+.tbadge.warn{background:var(--warn);color:#060a12}
+.toolbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:11px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tb-l h3{font-size:14px;font-weight:700}
+.tb-l p{font-size:11px;color:var(--muted);margin-top:1px}
+.tb-r{display:flex;gap:8px}
+.tbtn{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r2);border:1px solid var(--bd);background:var(--s2);color:var(--soft);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;font-family:'Outfit',sans-serif}
+.tbtn:hover{border-color:var(--info);color:var(--info)}
+.tbtn.ok{background:var(--ok);color:#060a12;border-color:var(--ok);font-weight:800}
+.tbtn.ok:hover{background:#fff}
+.content{flex:1;overflow-y:auto;padding:20px 22px}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;text-align:center;gap:10px}
+.empty-ico{font-size:56px;margin-bottom:8px;opacity:.5}
+.empty h3{font-size:17px;font-weight:700;color:var(--soft)}
+.empty p{font-size:13px;color:var(--muted);max-width:420px;line-height:1.6}
+
+/* LOADING */
+.loading-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.lb-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.spinner{width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--info);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lb-title{font-size:13px;font-weight:700}
+.lb-step{font-size:11px;color:var(--muted);margin-top:2px}
+.pbar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.pfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--info),#0080ff);transition:width .4s}
+.log-box{max-height:90px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.lline{font-size:10px;font-family:'JetBrains Mono',monospace;display:flex;gap:6px}
+.lline.ok{color:var(--ok)}.lline.info{color:var(--info)}.lline.warn{color:var(--warn)}
+.lts{color:var(--bd2);flex-shrink:0}
+
+/* SOURCE COMPARISON */
+.src-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.src-panel{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.src-panel-head{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.src-panel-head.ali{background:var(--alig)}
+.src-panel-head.mic{background:var(--micg)}
+.src-panel-name{font-size:13px;font-weight:700}
+.src-panel-count{margin-left:auto;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.src-panel-body{padding:10px 14px}
+
+/* RESULT CARDS */
+.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.rcard{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:.2s}
+.rcard:hover{transform:translateY(-2px)}
+.rcard.ali-card{border-top:2px solid var(--ali)}
+.rcard.mic-card{border-top:2px solid var(--mic)}
+.rcard.validated{border-color:var(--ok)}
+.rcard.discarded{opacity:.35}
+.rc-head{padding:11px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;gap:9px}
+.rc-src{font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.rc-src.ali{background:var(--alig);color:var(--ali)}
+.rc-src.mic{background:var(--micg);color:var(--mic)}
+.rc-meta{flex:1;min-width:0}
+.rc-ref{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--info);margin-bottom:2px}
+.rc-name{font-size:12px;font-weight:700;line-height:1.3;margin-bottom:2px}
+.rc-supplier{font-size:10px;color:var(--muted)}
+.rc-status{display:flex;align-items:center;gap:3px;font-size:9px;font-weight:700;text-transform:uppercase;flex-shrink:0}
+.sdot{width:5px;height:5px;border-radius:50%}
+.sdot.pending{background:var(--warn)}.sdot.validated{background:var(--ok)}.sdot.discarded{background:var(--muted)}
+.rc-body{padding:11px 14px}
+.rc-prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px}
+.pbox{border-radius:6px;padding:7px 8px;text-align:center}
+.pbox.src{background:var(--s1);border:1px solid var(--bd)}
+.pbox.landed{background:var(--warng);border:1px solid rgba(255,171,0,.2)}
+.pbox.sale{background:var(--infog);border:1px solid rgba(0,200,255,.2)}
+.pbox.margin{background:var(--okg);border:1px solid rgba(0,230,118,.2)}
+.pb-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:3px}
+.pb-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.pb-val.ali{color:var(--ali)}.pb-val.mic{color:var(--mic)}.pb-val.sale{color:var(--info)}.pb-val.ok{color:var(--ok)}
+.rc-info{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.info-tag{font-size:9px;padding:2px 7px;border-radius:10px;background:var(--s1);border:1px solid var(--bd);color:var(--soft)}
+.info-tag.ok{background:var(--okg);border-color:rgba(0,230,118,.2);color:var(--ok)}
+.rc-link{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--info);text-decoration:none;margin-bottom:9px;transition:.15s}
+.rc-link:hover{color:#fff}
+.rc-actions{display:flex;gap:5px}
+.pa{flex:1;padding:7px;border-radius:6px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;transition:.15s;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px}
+.pa.validate{background:var(--okg);border-color:var(--ok);color:var(--ok)}
+.pa.validate:hover{background:var(--ok);color:#060a12}
+.pa.edit{background:var(--warng);border-color:var(--warn);color:var(--warn)}
+.pa.edit:hover{background:var(--warn);color:#060a12}
+.pa.discard{background:var(--redg);border-color:rgba(255,64,96,.3);color:var(--red)}
+.pa.discard:hover{background:var(--red);color:#fff}
+
+/* CATALOGUE TABLE */
+.cat-table{width:100%;border-collapse:collapse;font-size:12px}
+.cat-table th{text-align:left;padding:8px 12px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--s1)}
+.cat-table td{padding:10px 12px;border-bottom:1px solid rgba(30,51,84,.4)}
+.cat-table tr:hover td{background:rgba(255,255,255,.015)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+.edit-cell input{width:100%;background:var(--s1);border:1px solid var(--bd);border-radius:5px;padding:4px 7px;color:var(--txt);font-size:11px;outline:none;font-family:'JetBrains Mono',monospace}
+.edit-cell input:focus{border-color:var(--info)}
+
+/* SUMMARY */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;text-align:center}
+.kpi-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;margin-bottom:4px}
+.kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* TOAST */
+.toasts{position:fixed;bottom:20px;right:20px;z-index:600;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--s2);border-radius:9px;padding:11px 16px;font-size:12px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.6);max-width:300px;border-left:3px solid var(--info);animation:toastIn .3s ease}
+.toast.ok{border-left-color:var(--ok)}.toast.err{border-left-color:var(--red)}.toast.warn{border-left-color:var(--warn)}
+@keyframes toastIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* NOTE BANNER */
+.note-banner{background:var(--warng);border:1px solid rgba(255,171,0,.3);border-radius:var(--r2);padding:10px 14px;font-size:11px;color:var(--warn);margin-bottom:14px;display:none}
+.note-banner.show{display:flex;align-items:flex-start;gap:8px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="h-brand">
+    <div class="h-ico">A</div>
+    <div>
+      <div class="h-title">ARGO <em>Catalogue Builder</em></div>
+      <div class="h-sub">Sourcing Alibaba.com + Made-in-China.com — Composants Frigorifiques</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <div class="hpill info"><span class="dot"></span> <span id="hApiStatus">Prêt</span></div>
+    <div class="hpill ok">✓ <span id="hValidCount">0</span> validé(s)</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- SEARCH -->
+    <div>
+      <div class="stitle">Rechercher un composant</div>
+      <div class="search-box">
+        <input class="search-input" id="searchInput" placeholder="ex: hermetic compressor 1HP R404A" onkeydown="if(event.key==='Enter')search()">
+        <div class="search-hint">Saisissez la référence, type ou caractéristique du composant en anglais pour de meilleurs résultats.</div>
+        <button class="btn primary" onclick="search()" id="searchBtn">⚡ Lancer la recherche</button>
+      </div>
+    </div>
+
+    <!-- QUICK SEARCHES -->
+    <div>
+      <div class="stitle">Recherches rapides</div>
+      <div class="quick-list">
+        <div class="quick-item" onclick="quickSearch('hermetic compressor piston refrigeration')"><span class="quick-ico">⚙️</span><span class="quick-name">Compresseur piston</span><span class="quick-cat">Compresseurs</span></div>
+        <div class="quick-item" onclick="quickSearch('scroll compressor R410A')"><span class="quick-ico">🌀</span><span class="quick-name">Compresseur scroll</span><span class="quick-cat">Compresseurs</span></div>
+        <div class="quick-item" onclick="quickSearch('evaporator coil refrigeration unit cooler')"><span class="quick-ico">❄️</span><span class="quick-name">Évaporateur à ailettes</span><span class="quick-cat">Évaporateurs</span></div>
+        <div class="quick-item" onclick="quickSearch('plate heat exchanger brazed refrigeration')"><span class="quick-ico">🔳</span><span class="quick-name">Évaporateur à plaques</span><span class="quick-cat">Évaporateurs</span></div>
+        <div class="quick-item" onclick="quickSearch('air cooled condenser refrigeration')"><span class="quick-ico">🌬️</span><span class="quick-name">Condenseur à air</span><span class="quick-cat">Condenseurs</span></div>
+        <div class="quick-item" onclick="quickSearch('thermostatic expansion valve TXV refrigeration')"><span class="quick-ico">🔧</span><span class="quick-name">Détendeur TXV</span><span class="quick-cat">Détente</span></div>
+        <div class="quick-item" onclick="quickSearch('electronic expansion valve EEV')"><span class="quick-ico">⚡</span><span class="quick-name">Détendeur électronique</span><span class="quick-cat">Détente</span></div>
+        <div class="quick-item" onclick="quickSearch('digital thermostat temperature controller refrigeration')"><span class="quick-ico">📟</span><span class="quick-name">Thermostat numérique</span><span class="quick-cat">Régulation</span></div>
+        <div class="quick-item" onclick="quickSearch('solenoid valve refrigeration 2 way')"><span class="quick-ico">🔩</span><span class="quick-name">Vanne solénoïde</span><span class="quick-cat">Vannes</span></div>
+        <div class="quick-item" onclick="quickSearch('refrigerant R134a R404A R410A cylinder')"><span class="quick-ico">🧪</span><span class="quick-name">Fluides frigorigènes</span><span class="quick-cat">Fluides</span></div>
+      </div>
+    </div>
+
+    <!-- SOURCES -->
+    <div>
+      <div class="stitle">Sources de prix</div>
+      <div class="sources-row">
+        <button class="src-tog ali-on" id="togAli" onclick="toggleSource('ali')">🟠 Alibaba</button>
+        <button class="src-tog mic-on" id="togMic" onclick="toggleSource('mic')">🔴 Made-in-CN</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div>
+      <div class="stitle">Paramètres</div>
+      <div class="setting">
+        <label class="slabel">Catégorie produit</label>
+        <select class="sselect" id="catSelect">
+          <option value="auto">Détection automatique</option>
+          <option value="Compresseurs">Compresseurs Hermétiques</option>
+          <option value="Évaporateurs">Évaporateurs</option>
+          <option value="Condenseurs">Condenseurs</option>
+          <option value="Organes de Détente">Organes de Détente</option>
+          <option value="Régulation">Régulation & Contrôle</option>
+          <option value="Vannes">Vannes & Filtres</option>
+          <option value="Fluides">Fluides Frigorigènes</option>
+          <option value="Outillage">Outillage</option>
+        </select>
+      </div>
+      <div class="setting">
+        <label class="slabel">Marge & Change</label>
+        <div class="margin-row">
+          <div class="mbox"><div class="mbox-lbl">Marge cible</div><input type="number" id="marginInput" value="60" min="10" max="90"> %</div>
+          <div class="mbox"><div class="mbox-lbl">Taux $/€</div><input type="number" id="rateInput" value="0.92" step="0.01"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div>
+      <div class="stitle">Historique des recherches</div>
+      <div class="history-list" id="historyList">
+        <div style="font-size:11px;color:var(--muted);text-align:center;padding:8px">Aucune recherche</div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <button class="btn success" onclick="exportCSV()" id="exportBtn" disabled>📥 Exporter CSV</button>
+      <button class="btn ghost" onclick="exportJSON()">{ } Exporter JSON</button>
+      <button class="btn danger" onclick="clearAll()">🗑 Tout effacer</button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="tabs">
+      <button class="tab on" onclick="showTab('results')" id="tab-results">🔍 Résultats <span class="tbadge info" id="badge-results">0</span></button>
+      <button class="tab" onclick="showTab('pending')" id="tab-pending">⏳ En attente <span class="tbadge warn" id="badge-pending">0</span></button>
+      <button class="tab" onclick="showTab('catalogue')" id="tab-catalogue">📦 Catalogue <span class="tbadge ok" id="badge-catalogue">0</span></button>
+      <button class="tab" onclick="showTab('compare')" id="tab-compare">📊 Comparaison</button>
+      <button class="tab" onclick="showTab('summary')" id="tab-summary">📈 Résumé</button>
+    </div>
+    <div class="toolbar">
+      <div class="tb-l">
+        <h3 id="tbTitle">Bienvenue dans ARGO</h3>
+        <p id="tbSub">Lancez une recherche pour sourcer vos composants frigorifiques</p>
+      </div>
+      <div class="tb-r">
+        <button class="tbtn ok" id="valAllBtn" onclick="validateAll()" style="display:none">✓ Tout valider</button>
+        <button class="tbtn" onclick="exportCSV()">📥 CSV</button>
+      </div>
+    </div>
+    <div class="content" id="mainContent">
+      <div class="empty">
+        <div class="empty-ico">🔍</div>
+        <h3>Prêt à sourcer</h3>
+        <p>Saisissez un composant dans la barre de recherche à gauche ou choisissez une recherche rapide. ARGO interroge Alibaba et Made-in-China en temps réel via votre serveur Vercel.</p>
+        <p style="margin-top:10px;font-size:11px;background:var(--infog);border:1px solid rgba(0,200,255,.2);border-radius:8px;padding:10px 14px;color:var(--info)">
+          ⚙️ <strong>Configuration requise :</strong> Renseignez l'URL de votre API Vercel dans les paramètres ci-dessous avant de lancer votre première recherche.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API CONFIG BANNER (bas de page) -->
+<div style="position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--bd);padding:10px 28px;display:flex;align-items:center;gap:14px;z-index:50">
+  <span style="font-size:11px;color:var(--muted);white-space:nowrap">🔗 URL API Vercel :</span>
+  <input id="apiUrl" style="flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:7px 12px;color:var(--txt);font-size:12px;outline:none;font-family:'JetBrains Mono',monospace" placeholder="https://evio.vercel.app/api/scrape" oninput="saveApiUrl()">
+  <button onclick="testApi()" style="background:var(--infog);border:1px solid rgba(0,200,255,.3);color:var(--info);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap">Tester la connexion</button>
+  <span id="apiTestResult" style="font-size:11px;color:var(--muted);white-space:nowrap"></span>
+</div>
+
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────
+let srcAli    = true;
+let srcMic    = true;
+let results   = [];   // résultats bruts de la dernière recherche
+let catalogue = [];   // produits validés
+let pending   = [];   // en attente de validation
+let history   = JSON.parse(localStorage.getItem('argo_history') || '[]');
+let activeTab = 'results';
+let isLoading = false;
+let logs      = [];
+let progress  = 0;
+
+// ── API URL ───────────────────────────────────────────────────────
+function getApiUrl() {
+  return document.getElementById('apiUrl').value.trim() || localStorage.getItem('argo_api_url') || '';
+}
+function saveApiUrl() {
+  localStorage.setItem('argo_api_url', document.getElementById('apiUrl').value.trim());
+}
+// Charger l'URL sauvegardée
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('argo_api_url') || '';
+  document.getElementById('apiUrl').value = saved;
+});
+
+async function testApi() {
+  const url = getApiUrl();
+  const el  = document.getElementById('apiTestResult');
+  if (!url) { el.textContent = '⚠️ URL vide'; el.style.color = 'var(--warn)'; return; }
+  el.textContent = '⏳ Test en cours...'; el.style.color = 'var(--muted)';
+  try {
+    const res  = await fetch(`${url}?keyword=test&sources=alibaba`);
+    const data = await res.json();
+    if (res.ok) {
+      el.textContent = '✅ Connexion OK !'; el.style.color = 'var(--ok)';
+      document.getElementById('hApiStatus').textContent = 'Connecté';
+      toast('✅ API Vercel connectée avec succès !', 'ok');
+    } else {
+      el.textContent = `❌ Erreur ${res.status}`; el.style.color = 'var(--red)';
+    }
+  } catch(e) {
+    el.textContent = '❌ Injoignable'; el.style.color = 'var(--red)';
+    toast('❌ API non joignable. Vérifiez l\'URL ou le déploiement Vercel.', 'err');
+  }
+}
+
+// ── SOURCE TOGGLE ─────────────────────────────────────────────────
+function toggleSource(src) {
+  if (src === 'ali') {
+    srcAli = !srcAli;
+    document.getElementById('togAli').className = `src-tog${srcAli ? ' ali-on' : ''}`;
+  } else {
+    srcMic = !srcMic;
+    document.getElementById('togMic').className = `src-tog${srcMic ? ' mic-on' : ''}`;
+  }
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────
+function quickSearch(keyword) {
+  document.getElementById('searchInput').value = keyword;
+  search();
+}
+
+async function search() {
+  const keyword = document.getElementById('searchInput').value.trim();
+  if (!keyword)    { toast('Saisissez un terme de recherche', 'warn'); return; }
+  if (!srcAli && !srcMic) { toast('Activez au moins une source', 'warn'); return; }
+
+  const apiUrl = getApiUrl();
+  if (!apiUrl) {
+    toast('⚠️ Renseignez l\'URL de votre API Vercel en bas de page', 'warn');
+    return;
+  }
+
+  isLoading = true; logs = []; progress = 0;
+  results = [];
+  showTab('results');
+  renderLoading();
+
+  const sources = [srcAli && 'alibaba', srcMic && 'made-in-china'].filter(Boolean).join(',');
+  const margin  = parseFloat(document.getElementById('marginInput').value) / 100 || 0.60;
+  const rate    = parseFloat(document.getElementById('rateInput').value) || 0.92;
+
+  addLog(`Recherche : "${keyword}"`, 'info');
+  addLog(`Sources : ${sources}`, 'info');
+  addLog(`Connexion au serveur Vercel...`, 'info');
+  progress = 20; renderLoading();
+
+  try {
+    const url = `${apiUrl}?keyword=${encodeURIComponent(keyword)}&sources=${sources}&margin=${margin}&exchange=${rate}`;
+    addLog(`Appel API : ${url.substring(0, 60)}...`, 'info');
+    progress = 40; renderLoading();
+
+    const res  = await fetch(url);
+    progress = 70; renderLoading();
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    progress = 90;
+    addLog(`${data.alibaba?.length || 0} résultats Alibaba`, 'ok');
+    addLog(`${data.made_in_china?.length || 0} résultats Made-in-China`, 'ok');
+
+    // Merger les résultats
+    results = [
+      ...(data.alibaba || []).map(p => ({...p, _status:'pending', _keyword:keyword})),
+      ...(data.made_in_china || []).map(p => ({...p, _status:'pending', _keyword:keyword})),
+    ];
+
+    if (data.errors?.length) {
+      data.errors.forEach(e => addLog(`⚠️ ${e.source}: ${e.error}`, 'warn'));
+    }
+
+    // Sauvegarder dans l'historique
+    saveHistory(keyword);
+    progress = 100;
+    addLog(`✅ ${results.length} produits trouvés`, 'ok');
+
+    await sleep(400);
+    isLoading = false;
+    updateAll();
+    toast(`⚡ ${results.length} produits trouvés pour "${keyword}"`, 'ok');
+
+  } catch(e) {
+    addLog(`❌ Erreur : ${e.message}`, 'warn');
+    progress = 100;
+    isLoading = false;
+    toast(`❌ Erreur : ${e.message}`, 'err');
+    updateAll();
+  }
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────
+function saveHistory(keyword) {
+  history = [keyword, ...history.filter(h => h !== keyword)].slice(0, 10);
+  localStorage.setItem('argo_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!history.length) { el.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px">Aucune recherche</div>'; return; }
+  el.innerHTML = history.map(h => `
+    <div class="hist-item">
+      <span style="font-size:12px">🕒</span>
+      <span class="hist-kw" onclick="quickSearch('${h.replace(/'/g,"\\'")}')">  ${h}</span>
+      <button class="hist-del" onclick="removeHistory('${h.replace(/'/g,"\\'")}')">×</button>
+    </div>
+  `).join('');
+}
+
+function removeHistory(kw) {
+  history = history.filter(h => h !== kw);
+  localStorage.setItem('argo_history', JSON.stringify(history));
+  renderHistory();
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────
+function validate(id) {
+  const p = results.find(r => r.id === id);
+  if (p) {
+    p._status = 'validated';
+    if (!catalogue.find(c => c.id === id)) catalogue.push(p);
+    updateAll();
+    toast(`✅ ${p.name.substring(0,30)}… ajouté au catalogue`, 'ok');
+  }
+}
+
+function discard(id) {
+  const p = results.find(r => r.id === id);
+  if (p) { p._status = 'discarded'; updateAll(); toast('Produit écarté', 'warn'); }
+}
+
+function validateAll() {
+  const toVal = results.filter(r => r._status === 'pending');
+  toVal.forEach(p => {
+    p._status = 'validated';
+    if (!catalogue.find(c => c.id === p.id)) catalogue.push(p);
+  });
+  updateAll();
+  toast(`✅ ${toVal.length} produits validés !`, 'ok');
+}
+
+function clearAll() {
+  if (!confirm('Effacer tout le catalogue ?')) return;
+  results = []; catalogue = []; pending = [];
+  updateAll();
+  toast('Catalogue effacé', 'warn');
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function nowTs() { return new Date().toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function addLog(msg, type='info') { logs.push({ts:nowTs(), msg, type}); }
+
+function renderLoading() {
+  const el = document.getElementById('mainContent');
+  const logHtml = logs.map(l =>
+    `<div class="lline ${l.type}"><span class="lts">[${l.ts}]</span><span>${l.type==='ok'?'✓':l.type==='warn'?'⚠':'›'} ${l.msg}</span></div>`
+  ).join('');
+  el.innerHTML = `
+    <div class="loading-box">
+      <div class="lb-head">
+        <div class="spinner"></div>
+        <div>
+          <div class="lb-title">ARGO interroge les fournisseurs…</div>
+          <div class="lb-step">${logs[logs.length-1]?.msg || ''}</div>
+        </div>
+      </div>
+      <div class="pbar"><div class="pfill" style="width:${progress}%"></div></div>
+      <div class="log-box">${logHtml}</div>
+    </div>`;
+}
+
+function renderCard(p) {
+  const src     = p.source === 'alibaba' ? 'ali' : 'mic';
+  const srcLbl  = p.source === 'alibaba' ? '🟠 ALIBABA' : '🔴 MADE-IN-CN';
+  const pr      = p.prices || {};
+  const statusC = p._status==='validated' ? 'var(--ok)' : p._status==='discarded' ? 'var(--muted)' : 'var(--warn)';
+  const statusL = p._status==='validated' ? 'Validé' : p._status==='discarded' ? 'Écarté' : 'En attente';
+  const catVal  = document.getElementById('catSelect').value;
+  const cat     = catVal !== 'auto' ? catVal : detectCat(p.name);
+
+  const actions = p._status !== 'discarded' ? `
+    <div class="rc-actions">
+      ${p._status !== 'validated' ? `<button class="pa validate" onclick="validate('${p.id}')">✓ Valider</button>` : ''}
+      <button class="pa discard" onclick="discard('${p.id}')">✕ Écarter</button>
+    </div>` : '';
+
+  return `
+    <div class="rcard ${src}-card ${p._status}" id="rcard-${p.id}">
+      <div class="rc-head">
+        <span class="rc-src ${src}">${srcLbl}</span>
+        <div class="rc-meta">
+          <div class="rc-ref">${p.ref || '—'}</div>
+          <div class="rc-name">${p.name || '—'}</div>
+          <div class="rc-supplier">🏭 ${p.supplier || '—'} · ⭐ ${p.supplier_rating || '—'} · ${p.supplier_years || '?'}ans</div>
+        </div>
+        <div class="rc-status"><div class="sdot ${p._status}"></div><span style="color:${statusC}">${statusL}</span></div>
+      </div>
+      <div class="rc-body">
+        <div class="rc-prices">
+          <div class="pbox src"><div class="pb-lbl">Prix source</div><div class="pb-val ${src}">${p.price_usd > 0 ? '$'+p.price_usd : '—'}</div></div>
+          <div class="pbox landed"><div class="pb-lbl">Coût landé</div><div class="pb-val">${pr.total_eur > 0 ? pr.total_eur+'€' : '—'}</div></div>
+          <div class="pbox sale"><div class="pb-lbl">Vente HT</div><div class="pb-val sale">${pr.sale_ht > 0 ? pr.sale_ht+'€' : '—'}</div></div>
+        </div>
+        <div class="rc-info">
+          <span class="info-tag">MOQ : ${p.moq || 1} ${p.unit || 'pcs'}</span>
+          <span class="info-tag">📅 ${p.lead_time || '?'}</span>
+          ${pr.margin_pct > 0 ? `<span class="info-tag ok">Marge ${pr.margin_pct}%</span>` : ''}
+          ${(p.certifications||[]).map(c => `<span class="info-tag ok">${c}</span>`).join('')}
+          <span class="info-tag">📂 ${cat}</span>
+        </div>
+        ${p.price_range ? `<div style="font-size:10px;color:var(--muted);margin-bottom:7px">Fourchette : ${p.price_range}</div>` : ''}
+        <a class="rc-link" href="${p.url || '#'}" target="_blank">🔗 Voir sur ${p.source === 'alibaba' ? 'Alibaba' : 'Made-in-China'} →</a>
+        ${actions}
+      </div>
+    </div>`;
+}
+
+function detectCat(name) {
+  const n = (name||'').toLowerCase();
+  if (/compressor/.test(n)) return 'Compresseurs';
+  if (/evaporator|evap/.test(n)) return 'Évaporateurs';
+  if (/condenser/.test(n)) return 'Condenseurs';
+  if (/expansion|valve|txv|eev/.test(n)) return 'Organes de Détente';
+  if (/thermostat|controller|pressostat/.test(n)) return 'Régulation';
+  if (/solenoid|ball valve|filter/.test(n)) return 'Vannes';
+  if (/refrigerant|r134|r404|r410/.test(n)) return 'Fluides';
+  return 'Composants';
+}
+
+function showTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('tab-'+tab)?.classList.add('on');
+
+  const el = document.getElementById('mainContent');
+  const vab = document.getElementById('valAllBtn');
+
+  const pendingList = results.filter(r => r._status === 'pending');
+  if (tab === 'results' && pendingList.length > 0) vab.style.display = 'flex';
+  else vab.style.display = 'none';
+
+  document.getElementById('tbTitle').textContent = {
+    results:'Résultats de recherche', pending:'En attente de validation',
+    catalogue:'Catalogue validé', compare:'Comparaison des sources', summary:'Résumé ARGO'
+  }[tab];
+  document.getElementById('tbSub').textContent = {
+    results:`${results.length} produits trouvés`,
+    pending:`${pendingList.length} produits à valider`,
+    catalogue:`${catalogue.length} produits dans le catalogue`,
+    compare:'Analyse comparative Alibaba vs Made-in-China',
+    summary:'Vue globale et statistiques'
+  }[tab];
+
+  if (tab === 'results') {
+    if (!results.length) {
+      el.innerHTML = `<div class="empty"><div class="empty-ico">🔍</div><h3>Aucun résultat</h3><p>Lancez une recherche pour voir les produits trouvés sur Alibaba et Made-in-China.</p></div>`;
+    } else {
+      // Note si fallback
+      const hasFallback = results.some(r => r.note);
+      const noteBanner = hasFallback ? `<div class="note-banner show">⚠️ <span>Certains résultats sont estimés car le scraping direct a été bloqué sur l'une des sources. Les prix restent représentatifs du marché. <a href="#" style="color:var(--warn)">En savoir plus</a></span></div>` : '';
+      el.innerHTML = noteBanner + `<div class="results-grid">${results.map(r => renderCard(r)).join('')}</div>`;
+    }
+  } else if (tab === 'pending') {
+    const list = results.filter(r => r._status === 'pending');
+    el.innerHTML = list.length ? `<div class="results-grid">${list.map(r => renderCard(r)).join('')}</div>`
+      : `<div class="empty"><div class="empty-ico">⏳</div><h3>Aucun produit en attente</h3><p>Tous les produits ont été traités.</p></div>`;
+  } else if (tab === 'catalogue') {
+    el.innerHTML = catalogue.length ? renderCatalogueTable() : `<div class="empty"><div class="empty-ico">📦</div><h3>Catalogue vide</h3><p>Validez des produits depuis les résultats de recherche.</p></div>`;
+  } else if (tab === 'compare') {
+    el.innerHTML = renderCompare();
+  } else if (tab === 'summary') {
+    el.innerHTML = renderSummary();
+  }
+}
+
+function renderCatalogueTable() {
+  return `
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Référence</th><th>Nom</th><th>Source</th><th>Catégorie</th>
+          <th>Prix source</th><th>Coût landé €</th><th>Vente HT €</th><th>Marge %</th>
+          <th>Fournisseur</th><th>MOQ</th><th>Délai</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${catalogue.map(p => {
+          const pr = p.prices || {};
+          return `<tr>
+            <td class="mono" style="color:var(--info)">${p.ref||'—'}</td>
+            <td style="max-width:180px;font-size:11px">${p.name||'—'}</td>
+            <td><span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;${p.source==='alibaba'?'background:var(--alig);color:var(--ali)':'background:var(--micg);color:var(--mic)'}">${p.source==='alibaba'?'ALIBABA':'MIC'}</span></td>
+            <td style="font-size:11px;color:var(--muted)">${detectCat(p.name)}</td>
+            <td class="mono">${p.price_usd > 0 ? '$'+p.price_usd : '—'}</td>
+            <td class="mono" style="color:var(--warn)">${pr.total_eur > 0 ? pr.total_eur+'€' : '—'}</td>
+            <td class="mono" style="color:var(--info)">${pr.sale_ht > 0 ? pr.sale_ht+'€' : '—'}</td>
+            <td class="mono" style="color:var(--ok)">${pr.margin_pct > 0 ? pr.margin_pct+'%' : '—'}</td>
+            <td style="font-size:11px;color:var(--muted)">${p.supplier||'—'}</td>
+            <td class="mono">${p.moq||1}</td>
+            <td style="font-size:11px;color:var(--muted)">${p.lead_time||'—'}</td>
+            <td><button onclick="removeFromCatalogue('${p.id}')" style="background:var(--redg);border:1px solid rgba(255,64,96,.3);color:var(--red);border-radius:5px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'Outfit',sans-serif">✕</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function removeFromCatalogue(id) {
+  catalogue = catalogue.filter(c => c.id !== id);
+  const p = results.find(r => r.id === id);
+  if (p) p._status = 'pending';
+  updateAll();
+  toast('Produit retiré du catalogue', 'warn');
+}
+
+function renderCompare() {
+  const aliProds = results.filter(r => r.source === 'alibaba' && r.price_usd > 0);
+  const micProds = results.filter(r => r.source === 'made-in-china' && r.price_usd > 0);
+  const avgAli   = aliProds.length ? Math.round(aliProds.reduce((s,p) => s+p.price_usd,0)/aliProds.length) : 0;
+  const avgMic   = micProds.length ? Math.round(micProds.reduce((s,p) => s+p.price_usd,0)/micProds.length) : 0;
+
+  if (!results.length) return `<div class="empty"><div class="empty-ico">📊</div><h3>Pas de données</h3><p>Lancez une recherche d'abord.</p></div>`;
+
+  return `
+    <div class="src-compare">
+      <div class="src-panel">
+        <div class="src-panel-head ali">
+          <span style="font-size:16px">🟠</span>
+          <span class="src-panel-name" style="color:var(--ali)">Alibaba.com</span>
+          <span class="src-panel-count" style="color:var(--ali)">${aliProds.length} résultats</span>
+        </div>
+        <div class="src-panel-body">
+          ${aliProds.map(p => `
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(30,51,84,.4);font-size:11px">
+              <span style="color:var(--soft);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name.substring(0,35)}</span>
+              <span style="font-family:'JetBrains Mono',monospace;color:var(--ali);font-weight:700;margin-left:8px">$${p.price_usd}</span>
+            </div>`).join('')}
+          <div style="margin-top:10px;padding:8px;background:var(--alig);border-radius:6px;text-align:center">
+            <div style="font-size:10px;color:var(--muted)">Prix moyen</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--ali)">$${avgAli}</div>
+          </div>
+        </div>
+      </div>
+      <div class="src-panel">
+        <div class="src-panel-head mic">
+          <span style="font-size:16px">🔴</span>
+          <span class="src-panel-name" style="color:var(--mic)">Made-in-China</span>
+          <span class="src-panel-count" style="color:var(--mic)">${micProds.length} résultats</span>
+        </div>
+        <div class="src-panel-body">
+          ${micProds.map(p => `
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(30,51,84,.4);font-size:11px">
+              <span style="color:var(--soft);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name.substring(0,35)}</span>
+              <span style="font-family:'JetBrains Mono',monospace;color:var(--mic);font-weight:700;margin-left:8px">$${p.price_usd}</span>
+            </div>`).join('')}
+          <div style="margin-top:10px;padding:8px;background:var(--micg);border-radius:6px;text-align:center">
+            <div style="font-size:10px;color:var(--muted)">Prix moyen</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--mic)">$${avgMic}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${avgAli > 0 && avgMic > 0 ? `
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-top:4px">
+      <div style="font-size:12px;font-weight:700;color:var(--info);margin-bottom:12px">💡 Analyse ARGO</div>
+      <div style="font-size:12px;color:var(--soft);line-height:1.7">
+        ${avgAli < avgMic
+          ? `🟠 <strong style="color:var(--ali)">Alibaba est moins cher</strong> de ${Math.round((1-avgAli/avgMic)*100)}% en moyenne. Recommandé pour ce composant.`
+          : `🔴 <strong style="color:var(--mic)">Made-in-China est moins cher</strong> de ${Math.round((1-avgMic/avgAli)*100)}% en moyenne. Recommandé pour ce composant.`}
+        <br>Fourchette globale : $${Math.min(...[...aliProds,...micProds].map(p=>p.price_usd))} — $${Math.max(...[...aliProds,...micProds].map(p=>p.price_usd))}
+      </div>
+    </div>` : ''}`;
+}
+
+function renderSummary() {
+  const allProds   = catalogue;
+  const byFamily   = {};
+  allProds.forEach(p => {
+    const cat = detectCat(p.name);
+    if (!byFamily[cat]) byFamily[cat] = { total:0, totalSale:0 };
+    byFamily[cat].total++;
+    byFamily[cat].totalSale += (p.prices?.sale_ht || 0);
+  });
+  const totalSale = allProds.reduce((s,p) => s+(p.prices?.sale_ht||0), 0);
+  const avgMargin = allProds.filter(p=>p.prices?.margin_pct>0).reduce((s,p)=>s+(p.prices?.margin_pct||0),0)/Math.max(allProds.filter(p=>p.prices?.margin_pct>0).length,1);
+
+  return `
+    <div class="kpi-grid">
+      ${[
+        {l:'Produits catalogués',v:catalogue.length,c:'var(--info)'},
+        {l:'Recherches effectuées',v:history.length,c:'var(--warn)'},
+        {l:'CA potentiel estimé',v:totalSale>0?totalSale+'€':'—',c:'var(--ok)'},
+        {l:'Marge moyenne',v:avgMargin>0?Math.round(avgMargin)+'%':'—',c:'var(--ok)'},
+      ].map(k => `<div class="kpi-box"><div class="kpi-val" style="color:${k.c}">${k.v}</div><div class="kpi-lbl">${k.l}</div></div>`).join('')}
+    </div>
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:700;color:var(--info)">📊 Répartition par famille</div>
+      <table class="cat-table">
+        <thead><tr><th>Famille</th><th>Références</th><th>CA potentiel HT</th><th>Moy. vente</th></tr></thead>
+        <tbody>
+          ${Object.entries(byFamily).map(([cat, f]) => `
+            <tr>
+              <td><strong>${cat}</strong></td>
+              <td class="mono">${f.total}</td>
+              <td class="mono" style="color:var(--info)">${f.totalSale > 0 ? f.totalSale+'€' : '—'}</td>
+              <td class="mono" style="color:var(--ok)">${f.total > 0 && f.totalSale > 0 ? Math.round(f.totalSale/f.total)+'€' : '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ── UPDATE ALL ────────────────────────────────────────────────────
+function updateAll() {
+  const pendingList  = results.filter(r => r._status === 'pending');
+  const validList    = results.filter(r => r._status === 'validated');
+  document.getElementById('badge-results').textContent   = results.length;
+  document.getElementById('badge-pending').textContent   = pendingList.length;
+  document.getElementById('badge-catalogue').textContent = catalogue.length;
+  document.getElementById('hValidCount').textContent     = catalogue.length;
+  document.getElementById('exportBtn').disabled          = catalogue.length === 0;
+  renderHistory();
+  showTab(activeTab);
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!catalogue.length) { toast('Catalogue vide', 'warn'); return; }
+  const headers = ['ID','Référence','Nom','Source','Catégorie','Prix USD','Fourchette','Coût Landé €','Port €','Prix Vente HT €','Marge %','Fournisseur','Rating','MOQ','Délai','Certifications','URL'];
+  const rows = catalogue.map(p => {
+    const pr = p.prices || {};
+    return [
+      p.id, p.ref,
+      `"${(p.name||'').replace(/"/g,'""')}"`,
+      p.source, detectCat(p.name),
+      p.price_usd||'', p.price_range||'',
+      pr.total_eur||'', pr.shipping_eur||'',
+      pr.sale_ht||'', pr.margin_pct||'',
+      `"${(p.supplier||'').replace(/"/g,'""')}"`,
+      p.supplier_rating||'', p.moq||1, p.lead_time||'',
+      `"${(p.certifications||[]).join('|')}"`,
+      p.url||''
+    ].join(';');
+  });
+  const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+  dl(csv, `frigopro_catalogue_${new Date().toISOString().slice(0,10)}.csv`, 'text/csv;charset=utf-8');
+  toast(`📥 ${catalogue.length} produits exportés`, 'ok');
+}
+
+function exportJSON() {
+  if (!catalogue.length) { toast('Catalogue vide', 'warn'); return; }
+  dl(JSON.stringify(catalogue, null, 2), 'frigopro_catalogue.json', 'application/json');
+  toast(`{} JSON exporté`, 'ok');
+}
+
+function dl(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const el  = document.getElementById('toasts');
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.textContent = msg;
+  el.appendChild(div);
+  setTimeout(() => div.remove(), 3500);
+}
+
+// INIT
+renderHistory();
+updateAll();
+</script>
+</body>
+</html>
